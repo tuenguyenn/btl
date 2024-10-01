@@ -1,30 +1,52 @@
 <?php
 include 'db.php';
-// Kiểm tra nếu người dùng nhấn nút "Lưu" trong form thêm địa chỉ mới
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_new_address'])) {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_new_address'])) {
     $customer_id = $_SESSION['customer_id'];
-    // Lấy thông tin địa chỉ mới từ form
-    $new_name = $_POST['new_name'];
-    $new_address = $_POST['new_address'];
-    $new_phone_number = $_POST['new_phone_number'];
-    // Thực hiện truy vấn để thêm hoặc cập nhật thông tin địa chỉ mới vào cơ sở dữ liệu
-    $sql = "UPDATE customer SET name2=?, address2=?, phone_number2=? WHERE customer_id=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssi", $new_name, $new_address, $new_phone_number, $customer_id);
-    // Kiểm tra và thực hiện truy vấn
-    if ($stmt->execute()) {
-        echo '<script>alert("Địa chỉ mới đã được thêm hoặc cập nhật thành công!");</script>';
+    $new_name = trim($_POST['new_name']);
+    $new_address = trim($_POST['new_address']);
+    $new_phone_number = trim($_POST['new_phone_number']);
+    
+    $errors = [];
+    if (empty($new_name)) {
+        $errors[] = "Tên không được để trống.";
+    }
+    if (empty($new_address)) {
+        $errors[] = "Địa chỉ không được để trống.";
+    }
+    if (empty($new_phone_number)) {
+        $errors[] = "Số điện thoại không được để trống.";
+    } elseif (!preg_match("/^0\d{9}$/", $new_phone_number)) {
+        $errors[] = "Số điện thoại không hợp lệ.";
+    }
+
+    if (!empty($errors)) {
+        echo '<script>';
+        echo 'var errors = ' . json_encode($errors) . ';';
+        echo 'errors.forEach(function(error) {';
+        echo 'alert(error);';
+        echo '});';
+        echo '</script>';
     } else {
-        echo "Có lỗi xảy ra khi thêm hoặc cập nhật địa chỉ mới: " . $conn->error;
+        $sql = "UPDATE customer SET name2=?, address2=?, phone_number2=? WHERE customer_id=?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssi", $new_name, $new_address, $new_phone_number, $customer_id);
+        if ($stmt->execute()) {
+            echo '<script>';
+            echo 'document.getElementById("success_message").style.display = "block";';
+            echo '</script>';
+        } else {
+            echo "Có lỗi xảy ra khi thêm hoặc cập nhật địa chỉ mới: " . $conn->error;
+        }
     }
 }
-$query = "SELECT name,name2, address, address2,phone_number, phone_number2 FROM customer WHERE customer_id = ?";
+$query = "SELECT name, name2, address, address2, phone_number, phone_number2 FROM customer WHERE customer_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $_SESSION['customer_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 ?>
+
 <div class="modal fade" id="checkout_modal" role="dialog">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -78,30 +100,31 @@ $row = $result->fetch_assoc();
                 <h4 class="modal-title">Thêm địa chỉ mới</h4>
             </div>
             <div class="modal-body">
-                <!-- Thêm phần tử div để hiển thị thông báo -->
-                <div id="success_message" class="alert alert-success" style="display: none;">
-                    Địa chỉ mới đã được thêm thành công!
-                </div>
+                
                 <form id="add_address_form" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
-                    <div class="form-group">
+                    <div class="form-nhom">
                         <label for="new_name">Tên:</label>
                         <input type="text" name="new_name" class="form-control" id="new_name">
+                        <span id="name_error" class="error-message"></span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-nhom">
                         <label for="new_address">Địa chỉ:</label>
                         <input type="text" name="new_address" class="form-control" id="new_address">
+                        <span id="address_error" class="error-message"></span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-nhom">
                         <label for="new_phone_number">Số điện thoại:</label>
                         <input type="text" name="new_phone_number" class="form-control" id="new_phone_number">
+                        <span id="phone_number_error" class="error-message"></span>
                     </div>
-                    <!-- Sử dụng type="submit" cho nút "Lưu" -->
-                    <button type="submit" class="btn btn-success" name="save_new_address">Lưu</button>
+                    <button type="submit" class="luu" name="save_new_address">Lưu</button>
                 </form>
+
             </div>
         </div>
     </div>
 </div>
+
 <div id="bankTransferPopup" class="modal fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -157,9 +180,9 @@ $row = $result->fetch_assoc();
         margin-top: 10px;
     }
     .method{
-        padding-top: 10px;
+        padding-top: 10px;  
     }
-        .ok{
+        .ok , .luu{
         width: 120px;
         background-color: #0066cc;
         border-radius: 8px;
@@ -190,6 +213,16 @@ $row = $result->fetch_assoc();
         display: block; /* Hiển thị ảnh dưới dạng block để căn giữa */
         margin: 0 auto; /* Căn giữa ảnh theo chiều ngang */
         padding-bottom: 10px;
+    }
+    .modal-than{
+        display: flex;
+        flex-direction: column;
+    }
+    .error-message {
+        color: red;
+        font-size: 0.9em;
+        display: block;
+        margin-top: 5px;
     }
 </style>
 
@@ -234,7 +267,7 @@ $row = $result->fetch_assoc();
     };
     
 });
-document.getElementById("payment_method").addEventListener("change", function() {
+    document.getElementById("payment_method").addEventListener("change", function() {
         var paymentMethod = this.value;
         document.querySelectorAll(".payment_option").forEach(function(el) {
             el.style.display = "none";
@@ -251,9 +284,43 @@ document.getElementById("payment_method").addEventListener("change", function() 
     document.getElementById("payment_method").addEventListener("change", function() {
         var selectedMethod = this.value;
         if (selectedMethod === "bank") {
-            // Hiển thị popup khi chọn phương thức thanh toán là "Chuyển khoản ngân hàng"
             $('#bankTransferPopup').modal('show');
         }
     });
+    document.getElementById("add_address_form").addEventListener("submit", function(event) {
+        var name = document.getElementById("new_name").value.trim();
+        var address = document.getElementById("new_address").value.trim();
+        var phoneNumber = document.getElementById("new_phone_number").value.trim();
+        
+        var hasError = false;
+        
+        // Clear previous error messages
+        document.getElementById("name_error").textContent = "";
+        document.getElementById("address_error").textContent = "";
+        document.getElementById("phone_number_error").textContent = "";
+
+        if (name === "") {
+            document.getElementById("name_error").textContent = "Tên không được để trống.";
+            hasError = true;
+        }
+        if (address === "") {
+            document.getElementById("address_error").textContent = "Địa chỉ không được để trống.";
+            hasError = true;
+        }
+        if (phoneNumber === "") {
+            document.getElementById("phone_number_error").textContent = "Số điện thoại không được để trống.";
+            hasError = true;
+        } else if (!/^0\d{9}$/.test(phoneNumber)) {
+            document.getElementById("phone_number_error").textContent = "Số điện thoại không hợp lệ.";
+            hasError = true;
+        }
+        
+        if (hasError) {
+            event.preventDefault(); // Prevent form submission if there are errors
+        } else {
+            document.getElementById("success_message").style.display = "block";
+        }
+    });
+
 </script>
 

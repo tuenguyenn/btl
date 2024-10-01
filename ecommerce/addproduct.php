@@ -1,5 +1,4 @@
 
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,7 +51,7 @@
     </style>
 
 <body>
-    <form action="addexec.php" method="post" enctype="multipart/form-data" name="addproduct" onsubmit="return validateForm()">
+<form action="addexec.php" method="post" enctype="multipart/form-data" name="addproduct" onsubmit="return validateForm()">
         <div class="form-group">
             <label for="pname">Tên sản phẩm</label>
             <input name="pname" type="text" class="ed" placeholder="Nhập tên sản phẩm">
@@ -86,40 +85,60 @@
 
     <script>
         function validateForm() {
-            var a = document.forms["addproduct"]["pname"].value;
-            if (a == null || a == "") {
-                alert("Nhập tên sản phẩm");
+            var a = document.forms["addproduct"]["pname"].value.trim();
+            if (a == "") {
+                alert("Nhập tên sản phẩm"); 
                 return false;
             }
-            var b = document.forms["addproduct"]["desc"].value;
-            if (b == null || b == "") {
+            var b = document.forms["addproduct"]["desc"].value.trim();
+            if (b == "") {
                 alert("Nhập mô tả sản phẩm");
                 return false;
             }
-            var c = document.forms["addproduct"]["price"].value;
-            if (c == null || c == "") {
+            var c = document.forms["addproduct"]["price"].value.trim();
+            if (c == "") {
                 alert("Nhập giá");
                 return false;
             }
             var d = document.forms["addproduct"]["cat"].value;
-            if (d == null || d == "") {
+            if (d == "") {
                 alert("Nhập loại hàng");
                 return false;
             }
             var e = document.forms["addproduct"]["image"].value;
-            if (e == null || e == "") {
+            if (e == "") {
                 alert("Chọn ảnh sản phẩm");
                 return false;
             }
+
+            var fileInput = document.forms["addproduct"]["image"];
+            var file = fileInput.files[0];
+            var fileType = file.type;
+            var fileSize = file.size;
+            var allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+
+            // Check file type
+            if (!allowedTypes.includes(fileType)) {
+                alert("Không phải dạng ảnh");
+                return false;
+            }
+
+            if (fileSize > 5* 1024 * 1024) {
+                alert("Dung lượng ảnh phải nhỏ <= 5MB");
+                return false;
+            }
+
+            return true;
         }
 
         function isNumberKey(evt) {
-            var charCode = (evt.which) ? evt.which : event.keyCode
+            var charCode = (evt.which) ? evt.which : event.keyCode;
             if (charCode > 31 && (charCode < 48 || charCode > 57))
                 return false;
 
             return true;
         }
     </script>
+
 </body>
 </html>

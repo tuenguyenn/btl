@@ -11,7 +11,7 @@
     <a href="https://zalo.me/0828427851" target="_blank">
         <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/01/Logo-Zalo-App-Rec.png" alt="Messenger" width="50px" height="50px" class="chat-option-2">
     </a>
-    <a href="https://www.facebook.com/profile.php?id=100045745680963" target="_blank">
+    <a href="https://www.facebook.com/" target="_blank">
         <img src="https://shopdunk.com/images/uploaded-source/icon/ic_messenger.png" alt="Facebook" width="50x" height="50px " class="chat-option">
     </a>
 </div>

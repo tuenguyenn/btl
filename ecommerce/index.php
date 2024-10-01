@@ -29,7 +29,7 @@ include 'include/home/header.php'; // Bạn có thể thay đổi đường dẫ
 <?php
 // Định nghĩa hàm displayProducts
 function displayProducts($category, $conn) {
-    $query = "SELECT * FROM products WHERE Category = '$category' LIMIT 4";
+    $query = "SELECT * FROM products WHERE Category = '$category' ORDER BY Product_ID DESC LIMIT 4";
     $result = mysqli_query($conn, $query);
     if ($result) {
         while ($row = mysqli_fetch_array($result)) {
@@ -133,6 +133,5 @@ mysqli_close($conn); // Đóng kết nối CSDL
 </style>
 
 <?php include 'include/home/tuvan.php';?>
-
 
 <?php include 'include/home/footer.php';?>

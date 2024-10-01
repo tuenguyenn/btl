@@ -1,6 +1,6 @@
 <?php include('include/admin/header.php'); ?>
 <section>
-		<div class="container">
+		<div class="container" style="max-width:1200px">
 			<div class="row">
                 <?php include('include/admin/sidebar.php'); ?>
                 <div class="col-sm-9 padding-right">
@@ -16,6 +16,10 @@
                             </div>
                             <div class="panel-body">
                                 <table class="table">
+                                    <tr>
+                                        <td class="text-right"><strong>Ảnh sản phẩm:</strong></td>
+                                        <td><img src="reservation/img/products/<?php echo $row['imgUrl']; ?>" class="product-image" alt="Product Image"></td>
+                                    </tr>
                                     <tr>
                                         <td class="text-right"><strong>Khách hàng :</strong></td>
                                         <td class="text-info"><strong><?php echo $row['name'];?></strong></td>
@@ -35,11 +39,15 @@
                                     </tr>
                                     <tr>
                                         <td class="text-right"><strong>Giá :</strong></td>
-                                        <td class="text-danger"><strong><?php echo $row['amount'];?></strong></td>
+                                        <td class="text-danger"><strong><?php echo number_format($row['amount']);?>đ</strong></td>
                                     </tr>
                                     <tr>
                                         <td class="text-right"><strong>Sản phẩm:</strong></td>
                                         <td class="text-primary"><strong><?php echo $row['item'];?></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right"><strong>Trạng thái:</strong></td>
+                                        <td class="text-warning"><strong><?php echo $row['status']; ?></strong></td>
                                     </tr>
                                     <tr>
                                     <?php if($p == 'unconfirmed'){ ?>
@@ -55,6 +63,19 @@
                         
                         <?php endwhile; ?>
               </section>
+<style>
+    .col-sm-9 {
+            background-color: #FFFFFF; 
+            margin-top: 10px;
+            padding-left: 5px;
+            border: 1px solid  #ddd;
+            border-radius: 10px;
+        }
+        .product-image {
+            max-width: 200px; /* Điều chỉnh kích thước ảnh sản phẩm */
+            height: auto; /* Đảm bảo ảnh không bị biến dạng */
+            }
+</style>
 
 
 

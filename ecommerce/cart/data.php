@@ -178,61 +178,44 @@ class Shopping {
         // Kết nối đến cơ sở dữ liệu
         $customer_id = $_SESSION['customer_id'];
         $khach_id = $customer_id;
-        $contact = $_POST['contact'];   
-        $address = $_POST['address'];   
+        $contact = $_POST['contact'];
+        $address = $_POST['address'];
         $fullname = $_POST['name'];
         $date = date('m/d/y h:i:s A');
-        $item = '';
-        foreach($_SESSION['cart'] as $row):
-            if($row['qty'] != 0){
-                $product = '('.$row['qty'].') '.$row['product'];
-                $item = $product.', '.$item;
+    
+        foreach($_SESSION['cart'] as $row) {
+            if($row['qty'] != 0) {
+                $product = $row['product'];
+                $qty = $row['qty'];
                 $sql_get_img = "SELECT imgUrl FROM products WHERE Product = '" . $row['product'] . "'";
                 $result_img = mysqli_query($this->conn, $sql_get_img);
                 $row_img = mysqli_fetch_assoc($result_img);
                 $imgUrl = $row_img['imgUrl'];
+    
+                // Lấy giá tiền của sản phẩm
+                $sql_get_price = "SELECT price FROM products WHERE Product = '" . $row['product'] . "'";
+                $result_price = mysqli_query($this->conn, $sql_get_price);
+                $row_price = mysqli_fetch_assoc($result_price);
+                $price = $row_price['price']*25000;
+                $amount = $price * $qty;
+    
+                // Thêm thông tin đơn hàng vào bảng `order`
+                $q = "INSERT INTO dbmaytinh.order (customer_id, name, contact, address, item, imgUrl, amount, status, dateOrdered, dateDelivered, quantity) 
+                      VALUES ('$khach_id', '$fullname', '$contact', '$address', '$product', '$imgUrl', '$amount', 'unconfirmed', '$date', '', '$qty')";
+                mysqli_query($this->conn, $q);
             }
-        endforeach;
-        $amount = $_SESSION['total'];
-        $q = "INSERT INTO dbmaytinh.order VALUES (NULL, '$khach_id', '$fullname', '$contact', '$address', '$item','$imgUrl', '$amount', 'unconfirmed', '$date', '')";
-        mysqli_query($this->conn, $q);
-        
+        }
+    
         $query_delete_cart = "DELETE FROM cart WHERE customer_id = $customer_id";
         mysqli_query($this->conn, $query_delete_cart);
-        
+    
         // Xoá session giỏ hàng
-        unset($_SESSION['cart']); 
-        
+        unset($_SESSION['cart']);
+    
         echo "<script>alert('Cảm ơn quý khách đã đặt hàng!'); setTimeout(function(){ window.location.href = '../cart.php'; });</script>";
-
     }
     
-    function addReview($product, $comment, $rating) {
-        $mysqli_hostname = "localhost";
-        $mysqli_user = "root";
-        $mysqli_password = "";
-        $mysqli_database = "dbmaytinh";
-
-        $conn = mysqli_connect($mysqli_hostname, $mysqli_user, $mysqli_password, $mysqli_database) or die("Không thể kết nối database");
-        
-        if (!isset($_SESSION['customer_id'])) {
-            // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
-            header("Location: cuslogin.php");
-            exit(); 
-        }
-        
-        // Lấy customer_id từ session
-        $customer_id = $_SESSION['customer_id'];
-        
-        // Cập nhật cột comment trong bảng products
-        $q = "UPDATE products SET comment = '$comment' & SET rating='$rating' WHERE Product = '$product'";
-        
-        // Thực thi câu lệnh SQL
-        mysqli_query($this->conn, $q);
-        
-        // Trả về true để cho biết quá trình thêm đánh giá đã thành công
-        return true;
-    }
+  
     
     function verify(){
         $username = $_POST['username'];   

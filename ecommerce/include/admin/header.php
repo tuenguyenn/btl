@@ -73,7 +73,7 @@
         
         function getcategory(){
             global $conn;
-            $q = "SELECT * from dbmaytinh.category order by title asc";
+            $q = "SELECT * from dbmaytinh.category order by id desc";
             $result = mysqli_query($conn,$q);
             
             return $result;

@@ -38,7 +38,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>TAT Corp.</title>
+    <title>10 Way</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/font-awesome.min.css" rel="stylesheet">
 	<link href="css/main.css" rel="stylesheet">
@@ -71,9 +71,9 @@
                                 </div>
                             </div>
                             <div class="search_box col-sm-5">               
-                                        <form action="search.php" method="post">
-                                            <input type="text" placeholder="Tìm kiếm" name="filter" />
-                                        </form>
+                                    <form action="search.php" method="post">
+                                            <input type="text" placeholder="Tìm kiếm" name="filter" required />
+                                    </form>
                             </div>
 
                             </div>
@@ -92,7 +92,6 @@
 
                                         <?php
                                             if(isset($_SESSION['name'])) {
-                                                // Nếu đã đăng nhập, hiển thị tên người dùng và dropdown menu
                                                 echo '
                                                     <div class="dropdown">
                                                         <li><a class="dropbtn" href="#">' . $_SESSION['name'] . ' <i class="fa fa-caret-down"></i></a></li>
@@ -118,7 +117,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function(){
-            $(".dropbtn, .fa-caret-down").click(function(){
+            $(".dropbtn, .fa fa-caret-down").click(function(){
                 $(".dropdown-content").toggle();
             });
 

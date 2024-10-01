@@ -3,9 +3,8 @@
     <div class="container" style="max-width:1200px;">
         <div class="row">
             <?php include('include/admin/sidebar.php'); ?>  
-            <div class="col-sm-9 padding-right">
+            <div class="col-sm-9 ">
                 <div class="features_ordersinfors">
-                    <h2 class="title text-center">Đơn hàng</h2>
                     <div class="option col-md-12">
                         <div class="status" style="width:100%">
                             <a href="#data1" class="status-link selected" role="tab" data-toggle="tab">Chờ xác nhận</a>
@@ -18,7 +17,7 @@
                     <div class="tab-content">
                         <div class="tab-pane active" id="data1">
                             <table class="table table-bordered">
-                                <thead class="bg-primary">
+                                <thead class="bg-primary"style="background-color: #0066cc; color:white">
                                     <th>Ngày đặt hàng</th>
                                     <th>Khách hàng</th>
                                     <th>Sản phẩm</th>
@@ -37,7 +36,7 @@
                         </div>
                         <div class="tab-pane" id="data2">
                             <table class="table table-bordered">
-                                <thead class="bg-primary">
+                                <thead class="bg-primary"style="background-color: #0066cc; color:white">
                                     <th>Ngày giao</th>
                                     <th>Khách hàng</th>
                                     <th>Sản Phẩm</th>
@@ -56,7 +55,7 @@
                         </div>
                         <div class="tab-pane" id="data3">
                             <table class="table table-bordered">
-                                <thead class="bg-primary">
+                                <thead class="bg-primary" style="background-color: #0066cc; color:white">
                                     <th>Ngày thanh toán</th>
                                     <th>Khách hàng</th>
                                     <th>Sản phẩm</th>
@@ -73,7 +72,7 @@
                         </div>
                         <div class="tab-pane" id="data4">
                             <table class="table table-bordered">
-                                <thead class="bg-primary">
+                                <thead class="bg-primary" style="background-color: #0066cc; color:white">
                                     <th>Ngày đặt hàng</th>
                                     <th>Khách hàng</th>
                                     <th>Sản phẩm</th>
@@ -91,6 +90,10 @@
                     </div>
 
                     <style>
+                        .col-sm-9{
+                            background-color: #fff;
+                            margin-top: 10px;
+                        }
                         .selected {
                             border-bottom: 2px solid #0066CC; /* Đường viền màu xanh dưới chân status được chọn */
                             color: #0066CC;

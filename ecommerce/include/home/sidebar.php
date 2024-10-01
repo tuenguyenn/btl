@@ -6,8 +6,8 @@
                                <a href="view_orders.php" class="list-group-item">Đơn hàng </a> 
                                <a href="changepass.php" class="list-group-item">Đổi mật khẩu</a>                                                                                                                                                  
                          </div>
-                            <div class="list-group">
-                               <a href="logout.php" class="list-group-item active">Đăng xuất</a>
+                            <div class="list-group" >
+                               <a href="logout.php" class="list-group-item active" >Đăng xuất</a>
                             </div>
                </div>
 </div>

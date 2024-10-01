@@ -1,18 +1,16 @@
 <?php include('include/admin/header.php'); ?>
-
 <section>
 	<div class="container" style="max-width: 1200px;">
 		<div class="row">
 			<?php include('include/admin/sidebar.php'); ?>
 			<div class="col-sm-9 padding-right">
 				<div class="features_items"><!--features_items-->
-					<h2 class="title text-center">Sản phẩm</h2>
 					<label for="filter">Tìm</label> <input type="text" name="filter" value="" id="filter" />
 					<a rel="facebox" href="addproduct.php">Thêm sản phẩm</a>
 					<table cellpadding="1" cellspacing="1" id="resultTable">
-						<thead>
-							<tr>
-								<th style="border-left: 1px solid #C1DAD7">ID</th>
+						<thead style="background-color: #0066CC; color :white">
+							<tr >
+								<th>ID</th>
 								<th>Ảnh</th>
 								<th>Sản phẩm</th>
 								<th>Mô tả</th>
@@ -24,7 +22,7 @@
 						<tbody>
 							<?php
 								include('db.php');
-								$result = mysqli_query($conn,"SELECT * FROM products");
+								$result = mysqli_query($conn,"SELECT * FROM products ORDER BY Product_ID DESC ");
 								while($row = mysqli_fetch_array($result)) {
 									echo '<tr class="record">';
 									echo '<td style="border-left: 1px solid #C1DAD7;">'.$row['Product_ID'].'</td>';
@@ -58,7 +56,15 @@
 	</div>
 </section>
 
-
+<style>
+	.col-sm-9{
+		background-color: white;
+		padding: 20px;
+		border: 1px solid #C1DAD7;
+		border-radius: 10px;
+		margin-top: 10px;
+	}
+</style>
 
 </script>
 <script src="js/script.js"></script>

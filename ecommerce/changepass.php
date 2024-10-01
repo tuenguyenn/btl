@@ -1,21 +1,22 @@
 <?php
-// Include file kết nối đến cơ sở dữ liệu và khởi động session
-include('include/home/header.php');
-$passwordChanged = false;
-$confirmPasswordError = false;
-$currentPasswordError = false;
+ob_start();
 
-// Kiểm tra xem người dùng đã đăng nhập chưa
+include('include/home/header.php');
+
+$passwordChanged = false;
+$confirmPasswordError = '';
+$currentPasswordError = '';
+$newPasswordError = '';
+$generalError = ''; // Biến này sẽ chứa thông báo lỗi chung nếu có trường nào bị bỏ trống
+
 if (isset($_SESSION['customer_id'])) {
     $customer_id = $_SESSION['customer_id'];
     $query = "SELECT name, address, phone_number FROM customer WHERE customer_id = $customer_id";
     $result = mysqli_query($conn, $query);
 
-    // Kiểm tra xem truy vấn có thành công không
     if ($result) {
         $row = mysqli_fetch_assoc($result);
     } else {
-        // Xử lý lỗi khi truy vấn không thành công
         echo "Lỗi: " . mysqli_error($conn);
     }
 } else {
@@ -23,15 +24,14 @@ if (isset($_SESSION['customer_id'])) {
 }
 
 // Hàm để cập nhật mật khẩu của người dùng
-function updatePassword($conn, $customerId, $currentPassword, $newPassword ,$confirmNewPassword)
+function updatePassword($conn, $customerId, $currentPassword, $newPassword, $confirmNewPassword)
 {
-    global $currentPasswordError, $confirmPasswordError;
-    
-    // Trước tiên, kiểm tra xem mật khẩu hiện tại có khớp với mật khẩu đã lưu trong cơ sở dữ liệu không
+    global $currentPasswordError, $confirmPasswordError, $newPasswordError, $generalError;
+
+    // Kiểm tra mật khẩu hiện tại
     $query = "SELECT cuspass FROM customer WHERE customer_id=?";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
-        // Xử lý lỗi khi prepare không thành công
         echo "Lỗi prepare: " . $conn->error;
         return false;
     }
@@ -39,56 +39,65 @@ function updatePassword($conn, $customerId, $currentPassword, $newPassword ,$con
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
-    // Nếu mật khẩu không khớp, trả về false
+
     if ($row['cuspass'] != md5($currentPassword)) {
-        $currentPasswordError = true;
+        $currentPasswordError = "Mật khẩu hiện tại không đúng";
+        return false;
+    }
+
+    // Kiểm tra điều kiện mật khẩu mới
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/', $newPassword)) {
+        $newPasswordError = "Mật khẩu phải chứa ít nhất 8 ký tự, 
+                            bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
         return false;
     }
 
     // Kiểm tra mật khẩu mới và mật khẩu xác nhận có khớp nhau không
     if ($newPassword != $confirmNewPassword) {
-        $confirmPasswordError = true;
+        $confirmPasswordError = "Mật khẩu xác nhận không khớp";
         return false;
     }
 
-    // Nếu mật khẩu khớp, thực hiện cập nhật mật khẩu mới trong cơ sở dữ liệu
+    // Cập nhật mật khẩu mới
     $query = "UPDATE customer SET cuspass=? WHERE customer_id=?";
     $stmt = $conn->prepare($query);
     if (!$stmt) {
-        // Xử lý lỗi khi prepare không thành công
         echo "Lỗi prepare: " . $conn->error;
         return false;
     }
-
-    // Mã hóa mật khẩu mới bằng MD5
     $hashedPassword = md5($newPassword);
-
-    // Gọi hàm bind_param với biến trung gian
     $stmt->bind_param("si", $hashedPassword, $customerId);
 
-    // Kiểm tra và thực hiện truy vấn
     if ($stmt->execute()) {
-        return true; // Trả về true nếu cập nhật thành công
+        return true;
     } else {
-        return false; // Trả về false nếu có lỗi xảy ra
+        return false;
     }
 }
 
 if (isset($_POST['update_password'])) {
-    // Lấy dữ liệu từ form
     $currentPassword = $_POST['current_password'];
     $newPassword = $_POST['new_password'];
     $confirmNewPassword = $_POST['confirm_new_password'];
 
-    // Gọi hàm để cập nhật mật khẩu
-    if (updatePassword($conn, $_SESSION['customer_id'], $currentPassword, $newPassword, $confirmNewPassword)) {
-        // Nếu cập nhật thành công, chuyển hướng người dùng đến trang thông tin cá nhân hoặc hiển thị thông báo
-        $passwordChanged = true;
-    } 
+    // Kiểm tra xem tất cả các trường có được điền đầy đủ hay không
+    if (empty($currentPassword) || empty($newPassword) || empty($confirmNewPassword)) {
+        $generalError = "Vui lòng điền đầy đủ thông tin.";
+    } else {
+        if (updatePassword($conn, $_SESSION['customer_id'], $currentPassword, $newPassword, $confirmNewPassword)) {
+            echo "<script>
+                    alert('Đổi mật khẩu thành công!');
+                    window.location.href = 'logout.php';
+                  </script>";
+            exit();
+        }
+    }
 }
+ob_end_flush();
 ?>
+
 <section>
-    <style>
+<style>
        body {
             margin: 0; /* Loại bỏ margin mặc định */
             padding: 0; /* Loại bỏ padding mặc định */
@@ -161,10 +170,10 @@ if (isset($_POST['update_password'])) {
             margin-right: 20px;
         }
         .form-group input {
-            flex-grow: 1; /* Input sẽ mở rộng để lấp đầy không gian còn lại */
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 3px;
+            width: 300px;
         }
         .success {
         background-color: #d4edda;
@@ -176,8 +185,7 @@ if (isset($_POST['update_password'])) {
         text-align: center;
         }
         .error {
-        background-color: #FA8072;
-        border-color: #c3e6cb;
+       
         color: red;
         padding: 10px;
         margin-top: 10px;
@@ -192,46 +200,43 @@ if (isset($_POST['update_password'])) {
 }
        
     </style>
-</head>
-<body>
-<body>
-        <div class="bao container" style="max-width: 1200px;">
-            <?php include('include/home/sidebar.php'); ?>
-            <div class="chua col-md-9">
-                <?php if ($passwordChanged): ?>
-                    <div class="success">Đổi mật khẩu thành công!</div>
-                <?php endif; ?>
-                <?php if ($currentPasswordError): ?>
-                    <div class="error">Mật khẩu hiện tại không đúng</div>
-                <?php endif; ?>
-                <?php if ($confirmPasswordError): ?>
-                    <div class="error">Mật khẩu xác nhận không khớp</div>
-                <?php endif; ?>
-                <h2> Đổi Mật Khẩu</h2>
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                    <div class="form-group">
-                        <label for="current_password">Mật khẩu hiện tại:</label>
-                        <input type="password" name="current_password" id="current_password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="new_password">Mật khẩu mới:</label>
-                        <input type="password" name="new_password" id="new_password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm_new_password">Xác nhận mật khẩu mới:</label>
-                        <input type="password" name="confirm_new_password" id="confirm_new_password" required>
-                    </div>
-                    <button type="submit" name="update_password">Đổi Mật Khẩu</button>
-                </form>
-                <?php if (!empty($passwordError)): ?>
-                    <div class="error"><?php echo $passwordError; ?></div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </body>
-    
-</body>
-</section>
-<?php include 'include/home/tuvan.php';?>
-<?php include 'include/home/footer.php';?>
+    <div class="bao container" style="max-width: 1200px;">
+        <?php include('include/home/sidebar.php'); ?>
+        <div class="chua col-md-9">
+            <h2>Đổi Mật Khẩu</h2>
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                <div class="form-group">
+                    <label for="current_password">Mật khẩu hiện tại:</label>
+                    <input type="password" name="current_password" id="current_password">
+                    <?php if ($currentPasswordError): ?>
+                        <div class="error"><?php echo $currentPasswordError; ?></div>
+                    <?php endif; ?>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">Mật khẩu mới:</label>
+                    <input type="password" name="new_password" id="new_password">
+                    
+                </div>
+                    <?php if ($newPasswordError): ?>
+                        <div class="error"><?php echo $newPasswordError; ?></div>
+                    <?php endif; ?>
+                <div class="form-group">
+                    <label for="confirm_new_password">Xác nhận mật khẩu mới:</label>
+                    <input type="password" name="confirm_new_password" id="confirm_new_password">
+                    <?php if ($confirmPasswordError): ?>
+                        <div class="error"><?php echo $confirmPasswordError; ?></div>
+                    <?php endif; ?>
+                </div>
+                <button type="submit" name="update_password">Đổi Mật Khẩu</button>
+                <div class="form-group">
+                                    <span class="error"><?php echo $generalError; ?></span>
 
+                </div>
+
+            </form>
+        </div>
+    </div>
+</section>
+
+<?php include 'include/home/tuvan.php'; ?>
+<?php include 'include/home/footer.php'; ?>

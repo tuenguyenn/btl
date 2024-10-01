@@ -36,7 +36,7 @@
 							</div>
 						
 						<?php
-							$result = mysqli_query($conn,"SELECT * FROM products where  Category like '%$filter%'");
+							$result = mysqli_query($conn,"SELECT * FROM products where  Category like '%$filter%' order by Product_ID desc");
 							if($result){
 								while($row=mysqli_fetch_array($result)){
 									$prodID = $row["Product_ID"];   

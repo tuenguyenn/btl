@@ -11,7 +11,7 @@
 				<div class="features_items">
 					<h2 class="text-center" style="font-size: 20px;" >Kết quả tìm kiếm cho <strong><?php echo $filter;?></strong></h2>
 					<?php											
-						$result = mysqli_query($conn,"SELECT * FROM products where Product like '%$filter%' or Description like '%$filter%' or Category like '%$filter%'");
+						$result = mysqli_query($conn,"SELECT * FROM products where Product like '%$filter%'  or Category like '%$filter%'");
 						if($result){				
 						while($row=mysqli_fetch_array($result)){
 							$prodID = $row["Product_ID"];   

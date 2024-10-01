@@ -54,7 +54,7 @@
                 $dis=$row['discount'];
             }
         ?>
-        <form action="execeditproduct.php" method="post">
+        <form action="execeditproduct.php" method="post" enctype="multipart/form-data" name="editproduct" onsubmit="return validateForm()">
             <input type="hidden" name="prodid" value="<?php echo $_GET['id']; ?>">
             <div class="form-group">
                 <label for="pname">Tên:</label>
@@ -66,7 +66,7 @@
             </div>
             <div class="form-group">
                 <label for="price">Giá:</label>
-                <input type="text" name="price" value="<?php echo $price ?>" />
+                <input type="text" name="price" value="<?php echo $price ?>" onkeypress="return isNumberKey(event)"/>
             </div>
             <div class="form-group">
                 <label for="cat">Loại:</label>
@@ -83,10 +83,43 @@
             </div>
             <div class="form-group">
                 <label for="discount">Khuyến mãi:</label>
-                <input type="text" name="discount" value="<?php echo $dis ?>" />
+                <input type="text" name="discount" value="<?php echo $dis ?>"onkeypress="return isNumberKey(event)" />
             </div>
             <input type="submit" value="Lưu">
         </form>
-    
+        <script>
+            function validateForm() {
+                var a = document.forms["editproduct"]["pname"].value.trim();;
+                if (a == null || a == "") {
+                    alert("Nhập tên sản phẩm");
+                    return false;
+                }
+                var b = document.forms["editproduct"]["desc"].value.trim();;
+                if (b == null || b == "") {
+                    alert("Nhập mô tả sản phẩm");
+                    return false;
+                }
+                var c = document.forms["editproduct"]["price"].value.trim();;
+                if (c == null || c == "") {
+                    alert("Nhập giá");
+                    return false;
+                }
+                var d = document.forms["editproduct"]["cat"].value.trim();;
+                if (d == null || d == "") {
+                    alert("Nhập loại hàng");
+                    return false;
+                }
+               
+            
+            }
+
+            function isNumberKey(evt) {
+                var charCode = (evt.which) ? evt.which : event.keyCode
+                if (charCode > 31 && (charCode < 48 || charCode > 57))
+                    return false;
+
+                return true;
+            }
+    </script>
 </body>
 </html>

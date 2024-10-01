@@ -1,26 +1,27 @@
 <?php
-include('include/home/header.php'); 
+include('include/home/header.php');
 
-$successMessage = false; // Khởi tạo biến để lưu trạng thái của thông báo thành công
+$successMessage = false;
+$errors = [
+    'name' => '',
+    'address' => '',
+    'phone_number' => ''
+];
 
-// Kiểm tra xem người dùng đã đăng nhập chưa
 if (isset($_SESSION['customer_id'])) {
     $customer_id = $_SESSION['customer_id'];
     $query = "SELECT name, address, phone_number FROM customer WHERE customer_id = $customer_id";
     $result = mysqli_query($conn, $query);
 
-    // Kiểm tra xem truy vấn có thành công không
     if ($result) {
         $row = mysqli_fetch_assoc($result);
     } else {
-        // Xử lý lỗi khi truy vấn không thành công
         echo "Lỗi: " . mysqli_error($conn);
     }
 } else {
     echo "Bạn chưa đăng nhập.";
 }
 
-// Hàm cập nhật thông tin cá nhân
 function updateProfile($conn, $customerId, $name, $address, $phoneNumber) {
     $query = "UPDATE customer SET name=?, address=?, phone_number=? WHERE customer_id=?";
     $stmt = $conn->prepare($query);
@@ -32,25 +33,59 @@ function updateProfile($conn, $customerId, $name, $address, $phoneNumber) {
     $stmt->bind_param("sssi", $name, $address, $phoneNumber, $customerId);
     
     if ($stmt->execute()) {
-        return true; // Trả về true nếu cập nhật thành công
+        return true;
     } else {
-        return false; // Trả về false nếu có lỗi xảy ra
+        return false;
     }
 }
 
-// Kiểm tra xem người dùng đã gửi yêu cầu thay đổi thông tin cá nhân hay mật khẩu chưa
+function phoneNumberExists($conn, $phoneNumber, $customerId) {
+    $query = "SELECT 1 FROM customer WHERE phone_number = ? AND customer_id != ?";
+    $stmt = $conn->prepare($query);
+
+    if (!$stmt) {
+        return false;
+    }
+
+    $stmt->bind_param("si", $phoneNumber, $customerId);
+    $stmt->execute();
+    $stmt->store_result();
+    
+    return $stmt->num_rows > 0;
+}
+
 if (isset($_POST['update_profile'])) {
     $name = $_POST['name'];
     $address = $_POST['address'];
     $phoneNumber = $_POST['phone_number'];
 
-    if (updateProfile($conn, $_SESSION['customer_id'], $name, $address, $phoneNumber)) {
-        $successMessage = true; // Đặt biến successMessage thành true nếu cập nhật thành công
-    } else {
-        echo '<div class="error">Có lỗi xảy ra khi cập nhật thông tin cá nhân.</div>';
+    // Validate inputs
+    if (empty($name)) {
+        $errors['name'] = "Họ và tên không được để trống.";
+    }
+    if (empty($address)) {
+        $errors['address'] = "Địa chỉ không được để trống.";
+    }
+    if (empty($phoneNumber)) {
+        $errors['phone_number'] = "Số điện thoại không được để trống.";
+    } elseif (!preg_match('/^\d{10}$/', $phoneNumber)) {
+        $errors['phone_number'] = "Số điện thoại không hợp lệ";
+    } elseif (phoneNumberExists($conn, $phoneNumber, $_SESSION['customer_id'])) {
+        $errors['phone_number'] = "Số điện thoại đã tồn tại.";
+    }
+
+    // If no errors, update profile
+    if (!array_filter($errors)) {
+        if (updateProfile($conn, $_SESSION['customer_id'], $name, $address, $phoneNumber)) {
+            $successMessage = true;
+        } else {
+            $errors['general'] = "Có lỗi xảy ra khi cập nhật thông tin cá nhân.";
+        }
     }
 }
+
 ?>
+
 <section>
     <style>
         body {
@@ -84,10 +119,7 @@ if (isset($_POST['update_profile'])) {
         button[type="submit"]:hover {
                     opacity: 0.8; /* Giảm độ mờ khi hover */
             }
-        .error {
-            color: red;
-            margin-top: 10px;
-        }
+        
         .sidebar {
             width: 200px;
             height: 100%;
@@ -125,10 +157,10 @@ if (isset($_POST['update_profile'])) {
             margin-right: 20px;
         }
         .form-group input {
-            flex-grow: 1; /* Input sẽ mở rộng để lấp đầy không gian còn lại */
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 3px;
+            width: 300px;
         }
         .success {
         background-color: #d4edda;
@@ -140,8 +172,7 @@ if (isset($_POST['update_profile'])) {
         text-align: center;
         }
         .error {
-        background-color: #FA8072;
-        border-color: #c3e6cb;
+        
         color: red;
         padding: 10px;
         margin-top: 10px;
@@ -159,35 +190,44 @@ if (isset($_POST['update_profile'])) {
 <body>
 
 <div class="bao container" style="max-width: 1200px;">
-        <?php include('include/home/sidebar.php'); ?>
-        <div class="chua col-md-9">
-            <?php if ($successMessage): ?>
-                    <div class="success">Cập nhật thông tin cá nhân thành công!</div>
+    <?php include('include/home/sidebar.php'); ?>
+    <div class="chua col-md-9">
+        <?php if ($successMessage): ?>
+            <div class="success">Cập nhật thông tin cá nhân thành công!</div>
+        <?php endif; ?>
+        
+        <?php if (!empty($errors['general'])): ?>
+            <div class="error"><?php echo $errors['general']; ?></div>
+        <?php endif; ?>
+
+        <h2> Hồ sơ</h2>
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <div class="form-group">
+                <label for="name">Họ và tên:</label>
+                <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name']); ?>">
+                <?php if (!empty($errors['name'])): ?>
+                    <div class="error"><?php echo $errors['name']; ?></div>
                 <?php endif; ?>
-            <h2> Hồ sơ</h2>
-            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                <!-- Các trường nhập liệu -->
-                <div class="form-group">
-                    <label for="name">Họ và tên:</label>
-                    <input type="text" name="name" id="name" value="<?php echo $row['name']; ?>"><br>
-                </div>
-                <div class="form-group">
-                    <label for="address">Địa chỉ:</label>
-                    <input type="text" name="address" id="address" value="<?php echo $row['address']; ?>"><br>
-                </div>
-                <div class="form-group">
-                    <label for="phone_number">Số điện thoại:</label>
-                    <input type="text" name="phone_number" id="phone_number" value="<?php echo $row['phone_number']; ?>"><br>
-                </div>
-                
-                <!-- Nút Lưu -->
-                <button type="submit" name="update_profile">Lưu</button>
-                
-                <!-- Hiển thị thông báo nếu cập nhật thành công -->
-              
-            </form>
-        </div>
+            </div>
+            <div class="form-group">
+                <label for="address">Địa chỉ:</label>
+                <input type="text" name="address" id="address" value="<?php echo htmlspecialchars($row['address']); ?>">
+                <?php if (!empty($errors['address'])): ?>
+                    <div class="error"><?php echo $errors['address']; ?></div>
+                <?php endif; ?>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Số điện thoại:</label>
+                <input type="text" name="phone_number" id="phone_number" value="<?php echo htmlspecialchars($row['phone_number']); ?>">
+                <?php if (!empty($errors['phone_number'])): ?>
+                    <div class="error"><?php echo $errors['phone_number']; ?></div>
+                <?php endif; ?>
+            </div>
+
+            <button type="submit" name="update_profile">Lưu</button>
+        </form>
     </div>
+</div>
 </body>
 </section>
 <?php include 'include/home/tuvan.php';?>

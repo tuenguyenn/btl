@@ -341,6 +341,7 @@ a#scrollUp i{
   background-repeat: no-repeat;
   background-position: right 20px center; /* Điều chỉnh vị trí icon */
   border-radius: 20px; /* Bo viền của ô tìm kiếm */
+  color: #000;
 }
 .search_box {
   margin-top: 10px; 
@@ -680,17 +681,15 @@ a#scrollUp i{
 
 .product-information span {
   display: inline-block;
-  margin-bottom: 8px;
-  margin-top: 18px;
+  margin-bottom: 15px;
+  margin-top: 16px;
 }
 
 
 
 
 
-
-
-
+  
 
 
 /*************************

@@ -6,6 +6,7 @@
             <?php if(isset($_SESSION['customer_id'])): ?>
                 <?php 
                 include('db.php');
+                
                 $customer_id = $_SESSION['customer_id'];
                 $query = "SELECT * FROM cart WHERE customer_id = $customer_id";
                 $result = mysqli_query($conn, $query);
@@ -82,7 +83,7 @@
                                 <h4 class="nabel">Tổng:</h4>
                                 <span class="value total" id="discounted-total"><?php echo number_format($total); ?>đ</span>
                             </div>
-                        </div>
+                        </div>  
                         <hr style="color:#aaaaaa">
                         <div style="text-align:center">
                             <a href="#" class="dat text-center" data-toggle="modal" data-target="#checkout_modal">Đặt hàng</a>
@@ -123,7 +124,7 @@
         }
         .mua {
             margin-left: 20px;
-            height: 300px;
+            height: 330px;
         }
         .infor {
             margin-left: 20px;
@@ -214,14 +215,14 @@
     <script>
         function applyDiscount() {
             var discountCode = document.getElementById('discount-code').value;
-            var total = <?php echo $total; ?>;
+            var itotal = <?php echo $total; ?>;
             if (discountCode.toLowerCase() === 'giamgia') {
-                var discountAmount = total * 0.10;
-                var discountedTotal = total - discountAmount;
+                var discountAmount = itotal * 0.10;
+                var discountedTotal = itotal - discountAmount;
                 document.getElementById('discount-amount').innerText = '-' + discountAmount.toLocaleString('vi-VN') + 'đ';
                 document.getElementById('discounted-total').innerText = discountedTotal.toLocaleString('vi-VN') + 'đ';
                 document.getElementById('discount-info').style.display = 'flex';
-            } else {
+            } else {    
                 alert('Mã giảm giá không hợp lệ.');
                 document.getElementById('discount-info').style.display = 'none';
             }

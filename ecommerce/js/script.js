@@ -56,28 +56,6 @@ $(function(){
     });
     
     //login
-    $('#login').on('click',function(){
-        var username = $('#username').val(); 
-        var password = $('#password').val(); 
-        
-        $.post('cart/data.php?q=verify',
-               {
-                   username:username,
-                   password:password
-               },
-               function(data){
-                    if(data == 1){                        
-                        $('.error').removeClass().addClass('alert alert-success').html('<i class="fa fa-unlock"></i> Đăng nhập...'); 
-                        setInterval(function(){
-                            window.location = 'admin.php';
-                        },1000);
-                    }else{
-                        $('.error').addClass('alert alert-danger').html('Tài khoản mật khẩu chưa chính xác');
-                        $('#username').val('');
-                        $('#password').val(''); 
-                    }
-               });  
-    });
-   
+    
   
 });
